@@ -1169,9 +1169,9 @@
 
             getSpawnConfig() {
                 const configs = {
-                    light: { probability: 0.3, interval: 1500 },
-                    medium: { probability: 0.15, interval: 800 },
-                    heavy: { probability: 0.05, interval: 400 }
+                    light: { probability: 0.1, interval: 800 },
+                    medium: { probability: 0.05, interval: 500 },
+                    heavy: { probability: 0.02, interval: 300 }
                 };
                 return configs[this.trafficDensity] || configs.light;
             }
@@ -1313,18 +1313,33 @@
                 const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
                 const emojis = ['🚗', '🚙', '🚕', '🚐', '🚗'];
 
-                // Random direction from all four directions
+                // Shuffle directions array for truly random selection with equal distribution
                 const directions = ['north', 'south', 'east', 'west'];
-                const direction = directions[Math.floor(Math.random() * directions.length)];
 
-                // Check if there's already a vehicle at the spawn point
+                // Fisher-Yates shuffle for more randomness
+                for (let i = directions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [directions[i], directions[j]] = [directions[j], directions[i]];
+                }
+
+                // Try each direction until we find one that's not blocked
+                let direction = null;
                 const spawnBlockDistance = 80;
-                const hasBlockingVehicle = this.vehicles.some(v =>
-                    v.direction === direction && v.position < spawnBlockDistance
-                );
 
-                if (hasBlockingVehicle) {
-                    return; // Don't spawn if there's a vehicle too close to spawn point
+                for (let dir of directions) {
+                    const hasBlockingVehicle = this.vehicles.some(v =>
+                        v.direction === dir && v.position < spawnBlockDistance
+                    );
+
+                    if (!hasBlockingVehicle) {
+                        direction = dir;
+                        break;
+                    }
+                }
+
+                // If all directions are blocked, don't spawn
+                if (!direction) {
+                    return;
                 }
 
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
