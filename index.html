@@ -1017,28 +1017,34 @@
                     : intersectionHeight;
 
                 // STOP LINES: Top at 34%, Bottom at 66%, Left at 34%, Right at 66%
-                // Each road stops before their OWN stop line
+                // Visual formula: normal directions (E/S) use position directly
+                // Inverted directions (W/N) use: visual = roadSize + 50 - position
 
                 let stopLine, stopPosition;
 
                 if (this.direction === 'south') {
-                    // Road B (South): moving top to bottom, stop at 62% before line at 66%
+                    // Road B: visual = position. Stop before visual 66%
                     stopLine = roadSize * 0.66;
                     stopPosition = roadSize * 0.62;
                 } else if (this.direction === 'north') {
-                    // Road A (North): moving bottom to top (inverted visual)
-                    // Position increases, visual decreases. Stop line at 66% in position space
-                    stopLine = roadSize * 0.66;
-                    stopPosition = roadSize * 0.62;
+                    // Road A: visual = roadSize + 50 - position. Stop before visual 34%
+                    // 34% visual means: 0.34*roadSize = roadSize + 50 - position
+                    // position = roadSize + 50 - 0.34*roadSize = 0.66*roadSize + 50
+                    // But we work in roadSize units, so normalized: 0.66 + (50/roadSize)
+                    // For an 800px road: position ≈ 0.66*800 + 50 = 578
+                    // In percentage: 578/800 = 72.25%, but we want to stop before, so ~68%
+                    stopLine = roadSize * 0.66 + 50;
+                    stopPosition = roadSize * 0.62 + 50;
                 } else if (this.direction === 'east') {
-                    // Road C (East): moving left to right, stop at 30% before line at 34%
+                    // Road C: visual = position. Stop before visual 34%
                     stopLine = roadSize * 0.34;
                     stopPosition = roadSize * 0.30;
                 } else if (this.direction === 'west') {
-                    // Road D (West): moving right to left (inverted visual)
-                    // Position increases, visual decreases. Stop line at 34% in position space
-                    stopLine = roadSize * 0.34;
-                    stopPosition = roadSize * 0.30;
+                    // Road D: visual = roadSize + 50 - position. Stop before visual 66%
+                    // 66% visual means: 0.66*roadSize = roadSize + 50 - position
+                    // position = roadSize + 50 - 0.66*roadSize = 0.34*roadSize + 50
+                    stopLine = roadSize * 0.34 + 50;
+                    stopPosition = roadSize * 0.30 + 50;
                 }
 
                 const intersectionStart = roadSize * 0.28;
