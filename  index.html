@@ -243,11 +243,11 @@
         }
 
         .stop-line-top {
-            top: 34.5%;
+            top: 34%;
         }
 
         .stop-line-bottom {
-            top: 65.5%;
+            top: 66%;
         }
 
         .stop-line-vertical {
@@ -257,11 +257,11 @@
         }
 
         .stop-line-left {
-            left: 34.5%;
+            left: 34%;
         }
 
         .stop-line-right {
-            left: 65.5%;
+            left: 66%;
         }
 
         .road-sign {
@@ -1016,11 +1016,11 @@
                     ? intersectionWidth
                     : intersectionHeight;
 
-                // STOP LINE AT 34.5%
-                const stopLine = roadSize * 0.345; // THE WHITE STOP LINE AT 34.5%
+                // STOP LINE AT 34% (just before intersection entrance at 35%)
+                const stopLine = roadSize * 0.34; // THE WHITE STOP LINE AT 34%
 
-                // All vehicles stop at 34% (just before the 34.5% stop line)
-                const stopPosition = roadSize * 0.34;
+                // All vehicles stop at 32% (2% before the stop line, equal distance for all roads)
+                const stopPosition = roadSize * 0.32;
 
                 const intersectionStart = roadSize * 0.28;
                 const intersectionEnd = roadSize * 0.72;
