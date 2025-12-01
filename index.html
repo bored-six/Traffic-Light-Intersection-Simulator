@@ -1016,19 +1016,29 @@
                     ? intersectionWidth
                     : intersectionHeight;
 
-                // STOP LINES: Top/Left at 34%, Bottom/Right at 66%
-                // Vehicles stop 4% before their respective stop line
+                // STOP LINES: Top at 34%, Bottom at 66%, Left at 34%, Right at 66%
+                // Each road stops 4% before their OWN stop line
 
                 let stopLine, stopPosition;
 
-                if (this.direction === 'south' || this.direction === 'west') {
-                    // Roads approaching from far side: stop line at 66%, vehicles stop at 62%
+                if (this.direction === 'south') {
+                    // Road B (South): moving top to bottom, stop before bottom line at 66%
                     stopLine = roadSize * 0.66;
                     stopPosition = roadSize * 0.62;
-                } else {
-                    // Roads approaching from near side: stop line at 34%, vehicles stop at 30%
+                } else if (this.direction === 'north') {
+                    // Road A (North): moving bottom to top (inverted), stop before top line at 34%
+                    // Since position increases but visual is inverted, we need HIGHER value
+                    stopLine = roadSize * 0.34;
+                    stopPosition = roadSize * 0.38;
+                } else if (this.direction === 'east') {
+                    // Road C (East): moving left to right, stop before left line at 34%
                     stopLine = roadSize * 0.34;
                     stopPosition = roadSize * 0.30;
+                } else if (this.direction === 'west') {
+                    // Road D (West): moving right to left (inverted), stop before right line at 66%
+                    // Since position increases but visual is inverted, we need HIGHER value
+                    stopLine = roadSize * 0.66;
+                    stopPosition = roadSize * 0.70;
                 }
 
                 const intersectionStart = roadSize * 0.28;
