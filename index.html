@@ -1017,18 +1017,18 @@
                     : intersectionHeight;
 
                 // STOP LINES: Top/Left at 34%, Bottom/Right at 66%
-                // Vehicles stop 2% before their respective stop line
+                // Vehicles stop 4% before their respective stop line
 
                 let stopLine, stopPosition;
 
                 if (this.direction === 'south' || this.direction === 'west') {
-                    // Roads approaching from far side: stop line at 66%, vehicles stop at 64%
+                    // Roads approaching from far side: stop line at 66%, vehicles stop at 62%
                     stopLine = roadSize * 0.66;
-                    stopPosition = roadSize * 0.64;
+                    stopPosition = roadSize * 0.62;
                 } else {
-                    // Roads approaching from near side: stop line at 34%, vehicles stop at 32%
+                    // Roads approaching from near side: stop line at 34%, vehicles stop at 30%
                     stopLine = roadSize * 0.34;
-                    stopPosition = roadSize * 0.32;
+                    stopPosition = roadSize * 0.30;
                 }
 
                 const intersectionStart = roadSize * 0.28;
