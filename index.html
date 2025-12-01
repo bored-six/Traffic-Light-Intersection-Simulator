@@ -1351,8 +1351,8 @@
             }
 
             updateVehicles() {
-                const nsCanPass = this.currentState === 'ns-green';
-                const ewCanPass = this.currentState === 'ew-green';
+                const nsCanPass = this.currentState === 'ns-green' || this.currentState === 'ns-yellow';
+                const ewCanPass = this.currentState === 'ew-green' || this.currentState === 'ew-yellow';
                 const intersectionWidth = this.intersection.offsetWidth;
                 const intersectionHeight = this.intersection.offsetHeight;
 
