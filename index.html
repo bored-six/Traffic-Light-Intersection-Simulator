@@ -1056,8 +1056,9 @@
                     this.isCrossingIntersection = true;
                 }
 
-                // Once past the stop line, you're committed - NO STOPPING
-                if (this.position >= stopLine) {
+                // Once past the STOP POSITION, you're committed - NO STOPPING
+                // This is the point of no return: if you're past where you would stop, keep going
+                if (this.position >= stopPosition) {
                     this.hasPassedIntersection = true;
                 }
 
@@ -1085,13 +1086,10 @@
                     }
                 }
 
-                // Step 2: RED LIGHT = STOP BEFORE PEDESTRIAN LINE
-                // DO NOT CROSS THE PEDESTRIAN LINE IF RED - APPLIES TO ALL DIRECTIONS
+                // Step 2: RED/YELLOW LIGHT = STOP BEFORE STOP POSITION
+                // If light is red/yellow AND you haven't passed the stop position yet, STOP
                 if (!canPass && !this.hasPassedIntersection) {
-                    // If we're at or past the stop position, STOP
-                    if (this.position >= stopPosition) {
-                        canMove = false;
-                    }
+                    canMove = false;
                 }
 
                 // Step 3: Move or wait
