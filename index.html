@@ -229,58 +229,39 @@
             box-shadow: 0 0 20px rgba(255, 217, 61, 0.4), inset 0 0 20px rgba(0,0,0,0.5);
         }
 
-        .pedestrian-crossing {
+        .stop-line {
             position: absolute;
-            background: repeating-linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0.9) 0px,
-                rgba(255, 255, 255, 0.9) 6px,
-                transparent 6px,
-                transparent 10px
-            );
+            background: white;
             z-index: 1;
-            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
-            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.9; }
-            50% { opacity: 1; }
-        }
-
-        .crossing-horizontal {
+        .stop-line-horizontal {
             width: 30%;
-            height: 4%;
+            height: 4px;
             left: 35%;
         }
 
-        .crossing-top {
-            top: 31%;
+        .stop-line-top {
+            top: 34%;
         }
 
-        .crossing-bottom {
-            top: 65%;
+        .stop-line-bottom {
+            top: 66%;
         }
 
-        .crossing-vertical {
+        .stop-line-vertical {
             height: 30%;
-            width: 4%;
+            width: 4px;
             top: 35%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(255, 255, 255, 0.9) 0px,
-                rgba(255, 255, 255, 0.9) 6px,
-                transparent 6px,
-                transparent 10px
-            );
         }
 
-        .crossing-left {
-            left: 31%;
+        .stop-line-left {
+            left: 34%;
         }
 
-        .crossing-right {
-            left: 65%;
+        .stop-line-right {
+            left: 66%;
         }
 
         .road-sign {
@@ -847,11 +828,11 @@
                         <div class="road-sign sign-east">Road C</div>
                         <div class="road-sign sign-west">Road D</div>
 
-                        <!-- Pedestrian Crossings -->
-                        <div class="pedestrian-crossing crossing-horizontal crossing-top"></div>
-                        <div class="pedestrian-crossing crossing-horizontal crossing-bottom"></div>
-                        <div class="pedestrian-crossing crossing-vertical crossing-left"></div>
-                        <div class="pedestrian-crossing crossing-vertical crossing-right"></div>
+                        <!-- Stop Lines -->
+                        <div class="stop-line stop-line-horizontal stop-line-top"></div>
+                        <div class="stop-line stop-line-horizontal stop-line-bottom"></div>
+                        <div class="stop-line stop-line-vertical stop-line-left"></div>
+                        <div class="stop-line stop-line-vertical stop-line-right"></div>
 
                         <!-- Traffic Lights -->
                         <div class="traffic-light-mini tl-north" id="fixed-tl-north">
@@ -924,11 +905,11 @@
                         <div class="road-sign sign-east">Road C</div>
                         <div class="road-sign sign-west">Road D</div>
 
-                        <!-- Pedestrian Crossings -->
-                        <div class="pedestrian-crossing crossing-horizontal crossing-top"></div>
-                        <div class="pedestrian-crossing crossing-horizontal crossing-bottom"></div>
-                        <div class="pedestrian-crossing crossing-vertical crossing-left"></div>
-                        <div class="pedestrian-crossing crossing-vertical crossing-right"></div>
+                        <!-- Stop Lines -->
+                        <div class="stop-line stop-line-horizontal stop-line-top"></div>
+                        <div class="stop-line stop-line-horizontal stop-line-bottom"></div>
+                        <div class="stop-line stop-line-vertical stop-line-left"></div>
+                        <div class="stop-line stop-line-vertical stop-line-right"></div>
 
                         <!-- Traffic Lights -->
                         <div class="traffic-light-mini tl-north" id="smart-tl-north">
@@ -1035,18 +1016,11 @@
                     ? intersectionWidth
                     : intersectionHeight;
 
-                // PEDESTRIAN CROSSING AT 24%
-                const pedestrianLine = roadSize * 0.24; // THE PEDESTRIAN CROSSING LINE AT 24%
+                // STOP LINE AT 34% (just before intersection entrance at 35%)
+                const stopLine = roadSize * 0.34; // THE WHITE STOP LINE AT 34%
 
-                // Road C (East) stops at 21%, Road D (West) stops EXTREMELY close at 23.8%, others stop at 20%
-                let stopPosition;
-                if (this.direction === 'east') {
-                    stopPosition = roadSize * 0.21;  // Road C (East) stops at 21%
-                } else if (this.direction === 'west') {
-                    stopPosition = roadSize * 0.235;  // Road D (West) stops at 23.5% (CLOSER TO PEDESTRIAN CROSSING)
-                } else {
-                    stopPosition = roadSize * 0.20;  // Roads A & B stop at 20%
-                }
+                // ALL vehicles stop at 32% (2% before the stop line - equal distance for all roads)
+                const stopPosition = roadSize * 0.32;
 
                 const intersectionStart = roadSize * 0.28;
                 const intersectionEnd = roadSize * 0.72;
@@ -1057,8 +1031,8 @@
                     this.isCrossingIntersection = true;
                 }
 
-                // Once past the pedestrian line, you're committed - NO STOPPING
-                if (this.position >= pedestrianLine) {
+                // Once past the stop line, you're committed - NO STOPPING
+                if (this.position >= stopLine) {
                     this.hasPassedIntersection = true;
                 }
 
