@@ -21,9 +21,14 @@
             --input-border: #667eea;
             --stat-bg: #f8f9ff;
             --stat-border: #e0e0e0;
+            --accent-color: #667eea;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
         }
 
-        body.dark-mode {
+        /* Dark Theme */
+        body.theme-dark {
             --bg-gradient-start: #1a1a2e;
             --bg-gradient-end: #0f3460;
             --text-primary: #e0e0e0;
@@ -33,6 +38,145 @@
             --input-border: #4a90e2;
             --stat-bg: #1a2332;
             --stat-border: #2a3447;
+            --accent-color: #4a90e2;
+        }
+
+        /* Neon Theme */
+        body.theme-neon {
+            --bg-gradient-start: #0a0a0a;
+            --bg-gradient-end: #1a0a2e;
+            --text-primary: #00ffff;
+            --text-secondary: #ff00ff;
+            --card-bg: rgba(20, 20, 40, 0.95);
+            --card-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            --input-border: #ff00ff;
+            --stat-bg: rgba(0, 255, 255, 0.1);
+            --stat-border: rgba(255, 0, 255, 0.3);
+            --accent-color: #00ffff;
+        }
+
+        body.theme-neon .system-section,
+        body.theme-neon .mode-selector {
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 20px rgba(255, 0, 255, 0.1);
+        }
+
+        body.theme-neon .stat-label {
+            color: #ff00ff;
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+
+        body.theme-neon .header h1 {
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+        }
+
+        /* Pastel Theme */
+        body.theme-pastel {
+            --bg-gradient-start: #ffecd2;
+            --bg-gradient-end: #fcb69f;
+            --text-primary: #5d4e60;
+            --text-secondary: #5d4e60;
+            --card-bg: #fff5f5;
+            --card-shadow: rgba(93, 78, 96, 0.15);
+            --input-border: #b8a9c9;
+            --stat-bg: #f0e6ef;
+            --stat-border: #d4c4d9;
+            --accent-color: #b8a9c9;
+        }
+
+        body.theme-pastel .update-btn {
+            background: linear-gradient(145deg, #b8a9c9, #98d6d6);
+        }
+
+        body.theme-pastel .simulation-buttons button:first-child {
+            background: #98d6d6 !important;
+        }
+
+        /* High Contrast Theme */
+        body.theme-contrast {
+            --bg-gradient-start: #000000;
+            --bg-gradient-end: #000000;
+            --text-primary: #ffffff;
+            --text-secondary: #ffffff;
+            --card-bg: #000000;
+            --card-shadow: none;
+            --input-border: #ffff00;
+            --stat-bg: #000000;
+            --stat-border: #ffff00;
+            --accent-color: #ffff00;
+        }
+
+        body.theme-contrast .system-section,
+        body.theme-contrast .mode-selector {
+            border: 3px solid #ffff00;
+        }
+
+        body.theme-contrast .stat-label {
+            color: #ffff00;
+        }
+
+        body.theme-contrast .update-btn {
+            background: #ffff00;
+            color: #000000;
+        }
+
+        body.theme-contrast .simulation-buttons button {
+            border: 2px solid #ffffff !important;
+        }
+
+        /* Retro Theme */
+        body.theme-retro {
+            --bg-gradient-start: #2c1810;
+            --bg-gradient-end: #4a2c17;
+            --text-primary: #f4d03f;
+            --text-secondary: #e8c547;
+            --card-bg: #3d2314;
+            --card-shadow: rgba(0, 0, 0, 0.5);
+            --input-border: #c9a227;
+            --stat-bg: #4a2c17;
+            --stat-border: #6b3d1f;
+            --accent-color: #c9a227;
+        }
+
+        body.theme-retro .header h1 {
+            font-family: 'Georgia', serif;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        body.theme-retro .system-section {
+            border: 4px double #c9a227;
+        }
+
+        /* Ocean Theme */
+        body.theme-ocean {
+            --bg-gradient-start: #0077b6;
+            --bg-gradient-end: #023e8a;
+            --text-primary: #caf0f8;
+            --text-secondary: #90e0ef;
+            --card-bg: rgba(0, 119, 182, 0.3);
+            --card-shadow: rgba(0, 0, 0, 0.4);
+            --input-border: #48cae4;
+            --stat-bg: rgba(144, 224, 239, 0.2);
+            --stat-border: rgba(72, 202, 228, 0.4);
+            --accent-color: #48cae4;
+        }
+
+        body.theme-ocean .header h1 {
+            text-shadow: 0 2px 10px rgba(0, 180, 216, 0.5);
+        }
+
+        /* Sunset Theme */
+        body.theme-sunset {
+            --bg-gradient-start: #f093fb;
+            --bg-gradient-end: #f5576c;
+            --text-primary: #ffffff;
+            --text-secondary: #4a1942;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-shadow: rgba(245, 87, 108, 0.3);
+            --input-border: #f5576c;
+            --stat-bg: rgba(240, 147, 251, 0.15);
+            --stat-border: rgba(245, 87, 108, 0.3);
+            --accent-color: #f5576c;
         }
 
         body {
@@ -54,34 +198,91 @@
             font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.9) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .theme-toggle {
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .theme-selector-container {
             position: absolute;
             top: 0;
             right: 20px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            color: var(--text-primary);
-            cursor: pointer;
-            font-size: 1.2em;
-            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .theme-toggle:hover {
-            background: rgba(255,255,255,0.3);
+        .theme-selector-label {
+            font-size: 0.85em;
+            color: var(--text-primary);
+            opacity: 0.9;
+        }
+
+        .theme-selector {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 16px;
+            border-radius: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+            min-width: 140px;
+        }
+
+        .theme-selector:hover {
+            background-color: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .theme-selector:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.6);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+        }
+
+        .theme-selector option {
+            background: #333;
+            color: white;
+            padding: 10px;
         }
 
         .watermark {
-            display: block;
-            margin-top: 8px;
-            font-size: 0.75em;
-            color: rgba(255, 255, 255, 0.5);
-            font-style: italic;
-            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: normal;
+            letter-spacing: 1px;
             text-align: center;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .watermark:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .main-container {
@@ -339,6 +540,41 @@
             height: 40px;
         }
 
+        /* Direction-specific vehicle glows for visual distinction */
+        .vehicle[data-direction="north"] {
+            filter: drop-shadow(0 0 6px rgba(52, 152, 219, 0.5));
+        }
+
+        .vehicle[data-direction="south"] {
+            filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.5));
+        }
+
+        .vehicle[data-direction="east"] {
+            filter: drop-shadow(0 0 6px rgba(155, 89, 182, 0.5));
+        }
+
+        .vehicle[data-direction="west"] {
+            filter: drop-shadow(0 0 6px rgba(46, 204, 113, 0.5));
+        }
+
+        /* Neon theme vehicle enhancements */
+        body.theme-neon .vehicle {
+            filter: drop-shadow(0 0 12px currentColor);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+        }
+
+        /* High contrast theme vehicle enhancements */
+        body.theme-contrast .vehicle {
+            border: 3px solid #ffff00;
+            background: #000 !important;
+        }
+
+        /* Pastel theme softer vehicles */
+        body.theme-pastel .vehicle {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            border: 2px solid rgba(93, 78, 96, 0.3);
+        }
+
         .traffic-light-mini {
             position: absolute;
             background: #1a1a1a;
@@ -513,34 +749,84 @@
 
         .stats {
             background: var(--stat-bg);
-            padding: 15px;
-            border-radius: 10px;
-            transition: background 0.3s ease;
+            padding: 20px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--stat-border);
+            margin-top: 15px;
+        }
+
+        .stats-title {
+            font-size: 0.9em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--stat-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: var(--accent-color);
+            border-radius: 2px;
         }
 
         .stat-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--stat-border);
+            align-items: center;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .stat-item:last-child {
-            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--stat-border);
+            transform: translateX(4px);
         }
 
         .stat-label {
             font-weight: 600;
             color: var(--input-border);
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label .stat-icon {
+            font-size: 1.1em;
         }
 
         .stat-value {
             color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 1.1em;
+            font-family: 'Courier New', monospace;
+            padding: 4px 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
         }
 
         .mode-selector {
             background: var(--card-bg);
-            padding: 20px;
+            padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 15px var(--card-shadow);
             margin-bottom: 30px;
@@ -608,15 +894,26 @@
                 font-size: 0.8em;
             }
 
-            .theme-toggle {
-                right: 10px;
-                padding: 8px 15px;
-                font-size: 1em;
+            .theme-selector-container {
+                position: static;
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+
+            .theme-selector-label {
+                font-size: 0.8em;
+            }
+
+            .theme-selector {
+                padding: 8px 30px 8px 12px;
+                font-size: 0.85em;
+                min-width: 120px;
             }
 
             .watermark {
-                font-size: 0.65em;
-                margin-top: 6px;
+                font-size: 0.7em;
+                padding: 5px 12px;
+                margin-top: 10px;
             }
 
             .main-container {
@@ -723,12 +1020,28 @@
             }
 
             .stats {
-                padding: 10px;
+                padding: 15px;
+            }
+
+            .stats-title {
+                font-size: 0.8em;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
             }
 
             .stat-item {
-                padding: 6px 0;
-                font-size: 0.9em;
+                padding: 10px 12px;
+                margin-bottom: 6px;
+                font-size: 0.85em;
+            }
+
+            .stat-value {
+                font-size: 1em;
+                padding: 3px 8px;
+            }
+
+            .stat-label .stat-icon {
+                font-size: 1em;
             }
 
             .vehicle {
@@ -912,10 +1225,22 @@
     </audio>
 
     <div class="header">
-        <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">🌙</button>
+        <div class="theme-selector-container">
+            <span class="theme-selector-label">Theme:</span>
+            <select class="theme-selector" id="theme-selector" onchange="changeTheme(this.value)">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="neon">Neon</option>
+                <option value="pastel">Pastel</option>
+                <option value="contrast">High Contrast</option>
+                <option value="retro">Retro</option>
+                <option value="ocean">Ocean</option>
+                <option value="sunset">Sunset</option>
+            </select>
+        </div>
         <h1>Traffic Light Intersection Simulator</h1>
         <p>Compare Fixed Timer vs Smart Adaptive Traffic Control</p>
-        <div class="watermark">made by bored.six</div>
+        <span class="watermark">made by bored.six</span>
     </div>
 
     <div class="mode-selector">
@@ -1036,24 +1361,25 @@
                     </div>
 
                     <div class="stats">
+                        <div class="stats-title">Performance Stats</div>
                         <div class="stat-item">
-                            <span class="stat-label">Vehicles Passed:</span>
+                            <span class="stat-label"><span class="stat-icon">🚗</span> Vehicles Passed</span>
                             <span class="stat-value" id="fixed-vehicles-passed">0</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Current Cycle:</span>
+                            <span class="stat-label"><span class="stat-icon">🔄</span> Current Cycle</span>
                             <span class="stat-value" id="fixed-cycle">1</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Total Time:</span>
+                            <span class="stat-label"><span class="stat-icon">⏱️</span> Total Time</span>
                             <span class="stat-value" id="fixed-total-time">0s</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Avg Queue Length:</span>
+                            <span class="stat-label"><span class="stat-icon">📊</span> Avg Queue</span>
                             <span class="stat-value" id="fixed-avg-queue">0.0</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Avg Wait Time:</span>
+                            <span class="stat-label"><span class="stat-icon">⏳</span> Avg Wait</span>
                             <span class="stat-value" id="fixed-avg-wait">0.0s</span>
                         </div>
                     </div>
@@ -1158,24 +1484,25 @@
                     </div>
 
                     <div class="stats">
+                        <div class="stats-title">Performance Stats</div>
                         <div class="stat-item">
-                            <span class="stat-label">Vehicles Passed:</span>
+                            <span class="stat-label"><span class="stat-icon">🚗</span> Vehicles Passed</span>
                             <span class="stat-value" id="smart-vehicles-passed">0</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Current Cycle:</span>
+                            <span class="stat-label"><span class="stat-icon">🔄</span> Current Cycle</span>
                             <span class="stat-value" id="smart-cycle">1</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Total Time:</span>
+                            <span class="stat-label"><span class="stat-icon">⏱️</span> Total Time</span>
                             <span class="stat-value" id="smart-total-time">0s</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Avg Queue Length:</span>
+                            <span class="stat-label"><span class="stat-icon">📊</span> Avg Queue</span>
                             <span class="stat-value" id="smart-avg-queue">0.0</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Avg Wait Time:</span>
+                            <span class="stat-label"><span class="stat-icon">⏳</span> Avg Wait</span>
                             <span class="stat-value" id="smart-avg-wait">0.0s</span>
                         </div>
                     </div>
@@ -1216,6 +1543,7 @@
 
                 const isHorizontal = this.direction === 'east' || this.direction === 'west';
                 this.element.className = `vehicle ${isHorizontal ? 'horizontal' : 'vertical'}`;
+                this.element.setAttribute('data-direction', this.direction);
                 this.element.style.background = this.color;
                 this.element.innerHTML = this.emoji;
 
@@ -2291,8 +2619,29 @@
             }
 
             spawnVehicle() {
+                // Expanded vehicle variety with direction-specific options
+                const vehiclesByDirection = {
+                    north: {
+                        emojis: ['🚗', '🚙', '🚕', '🏎️', '🚓', '🚑', '🛻', '🚐'],
+                        colors: ['#3498db', '#2980b9', '#1abc9c', '#16a085', '#27ae60']  // Blues/Teals
+                    },
+                    south: {
+                        emojis: ['🚗', '🚙', '🚕', '🏎️', '🚒', '🚚', '🚛', '🚎'],
+                        colors: ['#e74c3c', '#c0392b', '#d35400', '#e67e22', '#f39c12']  // Reds/Oranges
+                    },
+                    east: {
+                        emojis: ['🚗', '🚙', '🚕', '🏎️', '🚌', '🚍', '🚐', '🛵'],
+                        colors: ['#9b59b6', '#8e44ad', '#6c3483', '#a569bd', '#d7bde2']  // Purples
+                    },
+                    west: {
+                        emojis: ['🚗', '🚙', '🚕', '🏎️', '🚜', '🏍️', '🛺', '🚖'],
+                        colors: ['#2ecc71', '#27ae60', '#1e8449', '#58d68d', '#82e0aa']  // Greens
+                    }
+                };
+
+                // Legacy fallback colors/emojis
                 const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
-                const emojis = ['🚗', '🚙', '🚕', '🚐', '🚗'];
+                const emojis = ['🚗', '🚙', '🚕', '🚐', '🏎️'];
 
                 // ========================================================================
                 // DIRECTION SELECTION BASED ON SPAWN RATES
@@ -2383,8 +2732,10 @@
                     return;
                 }
 
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                // Use direction-specific vehicles for visual distinction
+                const directionVehicles = vehiclesByDirection[direction];
+                const randomColor = directionVehicles.colors[Math.floor(Math.random() * directionVehicles.colors.length)];
+                const randomEmoji = directionVehicles.emojis[Math.floor(Math.random() * directionVehicles.emojis.length)];
 
                 const vehicle = new Vehicle(direction, 1, randomColor, randomEmoji);
                 vehicle.create(this.intersection);
@@ -2695,25 +3046,36 @@
             console.log(`Spawn rates updated: N=${rates.north}, S=${rates.south}, E=${rates.east}, W=${rates.west}`);
         }
 
-        // Theme toggle function
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const themeToggle = document.getElementById('theme-toggle');
+        // Theme switching function
+        function changeTheme(themeName) {
+            // Remove all theme classes
+            document.body.classList.remove(
+                'theme-dark', 'theme-neon', 'theme-pastel',
+                'theme-contrast', 'theme-retro', 'theme-ocean', 'theme-sunset'
+            );
 
-            if (document.body.classList.contains('dark-mode')) {
-                themeToggle.textContent = '☀️';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeToggle.textContent = '🌙';
-                localStorage.setItem('theme', 'light');
+            // Add the selected theme class (light theme has no class)
+            if (themeName !== 'light') {
+                document.body.classList.add(`theme-${themeName}`);
             }
+
+            // Save preference
+            localStorage.setItem('theme', themeName);
         }
 
-        // Check for saved theme preference on load
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-            document.getElementById('theme-toggle').textContent = '☀️';
-        }
+        // Load saved theme on startup
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const selector = document.getElementById('theme-selector');
+
+            if (selector) {
+                selector.value = savedTheme;
+            }
+
+            if (savedTheme !== 'light') {
+                document.body.classList.add(`theme-${savedTheme}`);
+            }
+        })();
 
         // Auto-start on load
         fixedIntersection.start();
