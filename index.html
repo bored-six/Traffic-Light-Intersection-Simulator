@@ -1011,121 +1011,263 @@
             update(canPass, intersectionWidth, intersectionHeight, vehiclesAhead) {
                 if (!this.element) return false;
 
-                // Use the appropriate dimension based on direction
-                const roadSize = (this.direction === 'east' || this.direction === 'west')
-                    ? intersectionWidth
-                    : intersectionHeight;
+                // ========================================================================
+                // CONSTANTS
+                // ========================================================================
+                const VEHICLE_LENGTH = 40;      // Car length in pixels
+                const MIN_SAFE_DISTANCE = 55;   // Minimum gap between cars
+                const SPAWN_OFFSET = 50;        // Cars spawn 50px off-screen
 
-                // STOP LINES: Top at 34%, Bottom at 66%, Left at 34%, Right at 66%
-                // Visual formula: normal directions (E/S) use position directly
-                // Inverted directions (W/N) use: visual = roadSize + 50 - position
+                // ========================================================================
+                // COORDINATE SYSTEM
+                // ========================================================================
+                // 'position' starts at 0 and increases as the car travels forward.
+                //
+                // SPAWN POSITIONS (from create()):
+                //   South: top = -50px (off-screen above), position starts at 0
+                //   North: top = H + 50px (off-screen below), position starts at 0
+                //   East:  left = -50px (off-screen left), position starts at 0
+                //   West:  left = W + 50px (off-screen right), position starts at 0
+                //
+                // VISUAL POSITION FORMULAS (in update):
+                //   South: visual_top  = position - 50     (increasing position = moving down)
+                //   North: visual_top  = H + 50 - position (increasing position = moving up)
+                //   East:  visual_left = position - 50     (increasing position = moving right)
+                //   West:  visual_left = W + 50 - position (increasing position = moving left)
 
-                let stopLine, stopPosition;
+                // ========================================================================
+                // STOP LINE POSITIONS (CSS)
+                // ========================================================================
+                // Stop lines are where cars STOP BEFORE ENTERING the intersection!
+                // Top line:    top = 34% of H  → South cars stop here (coming from top)
+                // Bottom line: top = 66% of H  → North cars stop here (coming from bottom)
+                // Left line:   left = 34% of W → East cars stop here (coming from left)
+                // Right line:  left = 66% of W → West cars stop here (coming from right)
+
+                let stopPosition; // The 'position' value at which the front bumper reaches stop line
+
+                // IMPORTANT: Stop lines mark where cars ENTER the intersection, not exit!
+                // - South cars come from TOP, stop at TOP line (34%) before entering
+                // - North cars come from BOTTOM, stop at BOTTOM line (66%) before entering
+                // - East cars come from LEFT, stop at LEFT line (34%) before entering
+                // - West cars come from RIGHT, stop at RIGHT line (66%) before entering
 
                 if (this.direction === 'south') {
-                    // Road B: visual = position. Stop before visual 66%
-                    stopLine = roadSize * 0.66;
-                    stopPosition = roadSize * 0.62;
+                    // Traveling DOWN: visual_top = position - SPAWN_OFFSET
+                    // Front bumper is at visual_top + VEHICLE_LENGTH (bottom of car)
+                    // Front bumper visual = (position - 50) + 40 = position - 10
+                    // South cars stop at TOP line (34% of H) before entering intersection
+                    // Stop when: position - 10 = 0.34 * H
+                    // Therefore: position = 0.34 * H + 10
+                    stopPosition = intersectionHeight * 0.34 + (SPAWN_OFFSET - VEHICLE_LENGTH);
+
                 } else if (this.direction === 'north') {
-                    // Road A: visual = roadSize + 50 - position. Stop before visual 34%
-                    // 34% visual means: 0.34*roadSize = roadSize + 50 - position
-                    // position = roadSize + 50 - 0.34*roadSize = 0.66*roadSize + 50
-                    // But we work in roadSize units, so normalized: 0.66 + (50/roadSize)
-                    // For an 800px road: position ≈ 0.66*800 + 50 = 578
-                    // In percentage: 578/800 = 72.25%, but we want to stop before, so ~68%
-                    stopLine = roadSize * 0.66 + 50;
-                    stopPosition = roadSize * 0.62 + 50;
+                    // Traveling UP: visual_top = H + 50 - position
+                    // Front bumper is at visual_top (top of car is the front)
+                    // North cars stop at BOTTOM line (66% of H) before entering intersection
+                    // Stop when: H + 50 - position = 0.66 * H
+                    // Therefore: position = H + 50 - 0.66 * H = 0.34 * H + 50
+                    stopPosition = intersectionHeight * 0.34 + SPAWN_OFFSET;
+
                 } else if (this.direction === 'east') {
-                    // Road C: visual = position. Stop before visual 34%
-                    stopLine = roadSize * 0.34;
-                    stopPosition = roadSize * 0.30;
+                    // Traveling RIGHT: visual_left = position - SPAWN_OFFSET
+                    // Front bumper is at visual_left + VEHICLE_LENGTH (right edge of car)
+                    // Front bumper visual = (position - 50) + 40 = position - 10
+                    // East cars stop at LEFT line (34% of W) before entering intersection
+                    // Stop when: position - 10 = 0.34 * W
+                    // Therefore: position = 0.34 * W + 10
+                    stopPosition = intersectionWidth * 0.34 + (SPAWN_OFFSET - VEHICLE_LENGTH);
+
                 } else if (this.direction === 'west') {
-                    // Road D: visual = roadSize + 50 - position. Stop before visual 66%
-                    // 66% visual means: 0.66*roadSize = roadSize + 50 - position
-                    // position = roadSize + 50 - 0.66*roadSize = 0.34*roadSize + 50
-                    stopLine = roadSize * 0.34 + 50;
-                    stopPosition = roadSize * 0.30 + 50;
+                    // Traveling LEFT: visual_left = W + 50 - position
+                    // Front bumper is at visual_left (left edge of car is the front)
+                    // West cars stop at RIGHT line (66% of W) before entering intersection
+                    // Stop when: W + 50 - position = 0.66 * W
+                    // Therefore: position = W + 50 - 0.66 * W = 0.34 * W + 50
+                    stopPosition = intersectionWidth * 0.34 + SPAWN_OFFSET;
                 }
 
-                const intersectionStart = roadSize * 0.28;
-                const intersectionEnd = roadSize * 0.72;
-                const minSafeDistance = 55;
+                // ========================================================================
+                // STEP 1: UPDATE hasPassedIntersection FLAG
+                // ========================================================================
+                // This becomes TRUE when position >= stopPosition (front bumper crossed line)
+                // Once TRUE, stays TRUE forever. This is the MASTER FLAG that controls:
+                //   - Whether car ignores red lights (MUST continue through)
+                //   - Whether trailing cars should follow this car (NO - ignore it)
+                //   - Whether speed boost can activate (YES - if in intersection)
 
-                // Check if vehicle is in the intersection zone
-                if (this.position >= intersectionStart && this.position <= intersectionEnd) {
-                    this.isCrossingIntersection = true;
-                }
-
-                // Once past the STOP POSITION, you're committed - NO STOPPING
-                // This is the point of no return: if you're past where you would stop, keep going
-                if (this.position >= stopPosition) {
+                const hasPassedLine = this.position >= stopPosition;
+                if (hasPassedLine && !this.hasPassedIntersection) {
                     this.hasPassedIntersection = true;
+                    // Debug: log when a car passes the stop line
+                    // console.log(`[${this.direction}] Passed stop line at pos=${this.position.toFixed(0)}, stopPos=${stopPosition.toFixed(0)}`);
                 }
 
-                // Apply speed boost if crossing intersection and light is not green
-                if (this.isCrossingIntersection && this.hasPassedIntersection && !canPass) {
-                    this.speed = this.boostSpeed; // Speed up to clear intersection quickly
-                } else if (this.position > intersectionEnd) {
-                    this.speed = this.normalSpeed; // Return to normal speed after exiting
-                    this.isCrossingIntersection = false;
+                // ========================================================================
+                // STEP 2: CHECK IF CAR IS IN INTERSECTION BOX (35% - 65%)
+                // ========================================================================
+                // This is separate from stop line - it's the physical center box
+                // Used ONLY for speed boost calculation
+                // The center box is the area between 35% and 65% of the intersection
+
+                let inBoxStart, inBoxEnd;
+
+                if (this.direction === 'south') {
+                    // Visual top = position - 50
+                    // Enter box when visual = 35% = 0.35*H: position - 50 = 0.35*H → position = 0.35*H + 50
+                    // Exit box when visual = 65% = 0.65*H: position - 50 = 0.65*H → position = 0.65*H + 50
+                    inBoxStart = intersectionHeight * 0.35 + SPAWN_OFFSET;
+                    inBoxEnd = intersectionHeight * 0.65 + SPAWN_OFFSET;
+                } else if (this.direction === 'north') {
+                    // Visual top = H + 50 - position
+                    // Enter box when visual = 65% (coming from bottom): H + 50 - pos = 0.65*H → pos = 0.35*H + 50
+                    // Exit box when visual = 35%: H + 50 - pos = 0.35*H → pos = 0.65*H + 50
+                    inBoxStart = intersectionHeight * 0.35 + SPAWN_OFFSET;
+                    inBoxEnd = intersectionHeight * 0.65 + SPAWN_OFFSET;
+                } else if (this.direction === 'east') {
+                    // Visual left = position - 50
+                    // Enter box when visual = 35% = 0.35*W: position - 50 = 0.35*W → position = 0.35*W + 50
+                    // Exit box when visual = 65% = 0.65*W: position - 50 = 0.65*W → position = 0.65*W + 50
+                    inBoxStart = intersectionWidth * 0.35 + SPAWN_OFFSET;
+                    inBoxEnd = intersectionWidth * 0.65 + SPAWN_OFFSET;
+                } else if (this.direction === 'west') {
+                    // Visual left = W + 50 - position
+                    // Enter box when visual = 65% (coming from right): W + 50 - pos = 0.65*W → pos = 0.35*W + 50
+                    // Exit box when visual = 35%: W + 50 - pos = 0.35*W → pos = 0.65*W + 50
+                    inBoxStart = intersectionWidth * 0.35 + SPAWN_OFFSET;
+                    inBoxEnd = intersectionWidth * 0.65 + SPAWN_OFFSET;
+                }
+
+                this.isCrossingIntersection = this.position >= inBoxStart &&
+                                               this.position <= inBoxEnd;
+
+                // ========================================================================
+                // STEP 3: DETERMINE SPEED
+                // ========================================================================
+                // SPEED BOOST activates ONLY when ALL THREE conditions are true:
+                //   1. hasPassedIntersection === true (ALREADY crossed stop line)
+                //   2. isCrossingIntersection === true (currently inside the box)
+                //   3. canPass === false (light is RED for this direction)
+                //
+                // This guarantees cars NEVER speed up before crossing the stop line.
+
+                if (this.hasPassedIntersection && this.isCrossingIntersection && !canPass) {
+                    this.speed = this.boostSpeed;  // 3.5 - clear quickly
                 } else {
-                    this.speed = this.normalSpeed;
+                    this.speed = this.normalSpeed; // 2.0 - normal
                 }
 
-                // Step 1: Check collision with vehicle ahead (same direction ONLY)
+                // ========================================================================
+                // STEP 4: DETERMINE IF CAR CAN MOVE
+                // ========================================================================
                 let canMove = true;
 
-                for (let vehicle of vehiclesAhead) {
-                    if (vehicle === this) continue;
-                    if (vehicle.direction !== this.direction) continue;
+                if (this.hasPassedIntersection) {
+                    // ---------------------------------------------------------------
+                    // RULE A: CAR HAS PASSED STOP LINE → MUST CONTINUE
+                    // ---------------------------------------------------------------
+                    // Never stop inside the intersection. Always move forward.
+                    canMove = true;
 
-                    const distance = vehicle.position - this.position;
-                    if (distance > 0 && distance < minSafeDistance) {
-                        canMove = false;
-                        break;
+                } else {
+                    // ---------------------------------------------------------------
+                    // CAR HAS NOT PASSED STOP LINE → APPLY TRAFFIC RULES
+                    // ---------------------------------------------------------------
+
+                    // RULE B: COLLISION AVOIDANCE
+                    // Only follow cars that are ALSO before the stop line.
+                    // If the car ahead has crossed the stop line, IGNORE IT.
+                    // This prevents trailing behind cars that are in the intersection.
+
+                    for (const vehicle of vehiclesAhead) {
+                        // Skip self
+                        if (vehicle === this) continue;
+                        // Skip cars going different direction
+                        if (vehicle.direction !== this.direction) continue;
+
+                        // *** KEY FIX FOR TRAILING BUG ***
+                        // If the vehicle ahead has passed the stop line, do NOT follow it.
+                        // This car should stop at its own stop line instead.
+                        if (vehicle.hasPassedIntersection) {
+                            continue; // Ignore this vehicle
+                        }
+
+                        // Vehicle ahead is also before stop line - check distance
+                        const gap = vehicle.position - this.position;
+                        if (gap > 0 && gap < MIN_SAFE_DISTANCE) {
+                            // Too close to car ahead - must stop
+                            canMove = false;
+                            break;
+                        }
                     }
+
+                    // RULE C: TRAFFIC LIGHT
+                    // If light is red and we haven't stopped for a car ahead,
+                    // check if we need to stop at the line.
+                    if (!canPass && canMove) {
+                        // Would next move cross or reach the stop line?
+                        const nextPosition = this.position + this.speed;
+                        if (nextPosition >= stopPosition) {
+                            // Yes - stop here
+                            canMove = false;
+                        }
+                    }
+
                 }
 
-                // Step 2: RED/YELLOW LIGHT = STOP BEFORE STOP POSITION
-                // If light is red/yellow AND you haven't passed the stop position yet, STOP
-                if (!canPass && !this.hasPassedIntersection) {
-                    canMove = false;
-                }
-
-                // Step 3: Move or wait
+                // ========================================================================
+                // STEP 5: EXECUTE MOVEMENT
+                // ========================================================================
                 if (canMove) {
                     this.waiting = false;
                     this.position += this.speed;
                 } else {
                     this.waiting = true;
-                    // Don't move
                 }
 
-                // Step 4: Update visual position
-                if (this.direction === 'east') {
-                    this.element.style.left = `${this.position}px`;
-                    if (this.position > intersectionWidth + 50) {
-                        this.element.remove();
-                        return false;
-                    }
-                } else if (this.direction === 'west') {
-                    this.element.style.left = `${intersectionWidth + 50 - this.position}px`;
-                    if (this.position > intersectionWidth + 50) {
-                        this.element.remove();
-                        return false;
-                    }
-                } else if (this.direction === 'south') {
-                    this.element.style.top = `${this.position}px`;
-                    if (this.position > intersectionHeight + 50) {
-                        this.element.remove();
-                        return false;
-                    }
+                // ========================================================================
+                // STEP 6: UPDATE VISUAL POSITION
+                // ========================================================================
+                // All cars spawn at 50px off-screen. Position=0 corresponds to spawn point.
+                // Visual formulas must place the car at the spawn point when position=0.
+                //
+                // South: spawns at top=-50, so visual = position - 50
+                // North: spawns at top=H+50, so visual = H + 50 - position
+                // East:  spawns at left=-50, so visual = position - 50
+                // West:  spawns at left=W+50, so visual = W + 50 - position
+
+                if (this.direction === 'south') {
+                    this.element.style.top = `${this.position - SPAWN_OFFSET}px`;
                 } else if (this.direction === 'north') {
-                    this.element.style.top = `${intersectionHeight + 50 - this.position}px`;
-                    if (this.position > intersectionHeight + 50) {
-                        this.element.remove();
-                        return false;
-                    }
+                    this.element.style.top = `${intersectionHeight + SPAWN_OFFSET - this.position}px`;
+                } else if (this.direction === 'east') {
+                    this.element.style.left = `${this.position - SPAWN_OFFSET}px`;
+                } else if (this.direction === 'west') {
+                    this.element.style.left = `${intersectionWidth + SPAWN_OFFSET - this.position}px`;
+                }
+
+                // ========================================================================
+                // STEP 7: REMOVE IF EXITED SCREEN
+                // ========================================================================
+                // Calculate when the car has fully exited the visible area
+                // South/East: visual = position - 50, exit when visual > dimension (fully off bottom/right)
+                //   position - 50 > H → position > H + 50
+                // North/West: visual = dim + 50 - position, exit when visual < -40 (car fully off top/left)
+                //   dim + 50 - position < -40 → position > dim + 90
+                let exitThreshold;
+                if (this.direction === 'south') {
+                    exitThreshold = intersectionHeight + SPAWN_OFFSET;
+                } else if (this.direction === 'north') {
+                    exitThreshold = intersectionHeight + SPAWN_OFFSET + VEHICLE_LENGTH;
+                } else if (this.direction === 'east') {
+                    exitThreshold = intersectionWidth + SPAWN_OFFSET;
+                } else if (this.direction === 'west') {
+                    exitThreshold = intersectionWidth + SPAWN_OFFSET + VEHICLE_LENGTH;
+                }
+
+                if (this.position > exitThreshold) {
+                    this.element.remove();
+                    return false;
                 }
 
                 return true;
