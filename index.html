@@ -75,13 +75,13 @@
         }
 
         .watermark {
-            position: absolute;
-            bottom: -25px;
-            right: 0;
-            font-size: 0.7em;
-            color: rgba(255, 255, 255, 0.4);
+            display: block;
+            margin-top: 8px;
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.5);
             font-style: italic;
             letter-spacing: 0.5px;
+            text-align: center;
         }
 
         .main-container {
@@ -615,8 +615,8 @@
             }
 
             .watermark {
-                font-size: 0.6em;
-                bottom: -20px;
+                font-size: 0.65em;
+                margin-top: 6px;
             }
 
             .main-container {
@@ -759,6 +759,149 @@
                 min-width: 44px;
             }
         }
+
+        /* Per-Direction Controls Styling */
+        .direction-controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--stat-bg);
+            border-radius: 12px;
+            border: 2px solid var(--input-border);
+        }
+
+        .direction-controls-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .direction-inputs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .direction-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .direction-input-group label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .direction-input-group input {
+            width: 70px;
+            padding: 8px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+        }
+
+        /* Smart System Queue Display */
+        .queue-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--stat-bg);
+            border-radius: 10px;
+        }
+
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .queue-item.ns {
+            border-left-color: #2ecc71;
+        }
+
+        .queue-item.ew {
+            border-left-color: #e74c3c;
+        }
+
+        .queue-label {
+            font-weight: 600;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .queue-value {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--input-border);
+        }
+
+        /* Adaptive Decision Display */
+        .adaptive-status {
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea22, #764ba222);
+            border-radius: 10px;
+            border: 1px solid var(--input-border);
+        }
+
+        .adaptive-status-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .adaptive-decision {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            padding: 5px 0;
+            border-bottom: 1px solid var(--stat-border);
+        }
+
+        .adaptive-decision:last-child {
+            border-bottom: none;
+        }
+
+        .decision-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .decision-indicator.active {
+            background: #2ecc71;
+            box-shadow: 0 0 8px #2ecc71;
+        }
+
+        .decision-indicator.inactive {
+            background: #95a5a6;
+        }
+
+        @media (max-width: 768px) {
+            .direction-inputs {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .queue-display {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -783,6 +926,7 @@
                     <option value="light">Light</option>
                     <option value="medium">Medium</option>
                     <option value="heavy">Heavy</option>
+                    <option value="custom">Custom (Per-Direction)</option>
                 </select>
             </div>
             <div class="simulation-buttons">
@@ -790,6 +934,30 @@
                 <button id="pause-btn" onclick="pauseSimulation()" style="background: #f39c12; color: white;">Pause</button>
                 <button id="reset-btn" onclick="resetSimulation()" style="background: #e74c3c; color: white;">Reset</button>
             </div>
+        </div>
+
+        <!-- Per-Direction Spawn Controls -->
+        <div id="direction-controls" class="direction-controls" style="display: none;">
+            <div class="direction-controls-title">Per-Direction Spawn Rates (vehicles per minute)</div>
+            <div class="direction-inputs">
+                <div class="direction-input-group">
+                    <label>↓ North (Road A)</label>
+                    <input type="number" id="spawn-north" value="10" min="0" max="60">
+                </div>
+                <div class="direction-input-group">
+                    <label>↑ South (Road B)</label>
+                    <input type="number" id="spawn-south" value="10" min="0" max="60">
+                </div>
+                <div class="direction-input-group">
+                    <label>→ East (Road C)</label>
+                    <input type="number" id="spawn-east" value="10" min="0" max="60">
+                </div>
+                <div class="direction-input-group">
+                    <label>← West (Road D)</label>
+                    <input type="number" id="spawn-west" value="10" min="0" max="60">
+                </div>
+            </div>
+            <button class="update-btn" onclick="updateSpawnRates()" style="margin-top: 15px;">Apply Rates</button>
         </div>
     </div>
 
@@ -897,7 +1065,7 @@
         <div class="system-section">
             <div class="system-header">
                 <div class="system-title">Smart Traffic Control System</div>
-                <div style="color: #666; font-size: 0.9em;">Adaptive timing based on traffic flow simulation</div>
+                <div style="color: #666; font-size: 0.9em;">Adaptive timing based on real-time traffic analysis</div>
             </div>
 
             <div class="content-wrapper">
@@ -950,6 +1118,43 @@
                         <div class="light-large green" id="smart-green-large"></div>
                         <div class="timer-display" id="smart-timer">20</div>
                         <div class="status-display" id="smart-status">GO</div>
+                    </div>
+
+                    <!-- Real-time Queue Display -->
+                    <div class="queue-display">
+                        <div class="queue-item ns">
+                            <span class="queue-label">↓ North Queue</span>
+                            <span class="queue-value" id="smart-queue-north">0</span>
+                        </div>
+                        <div class="queue-item ns">
+                            <span class="queue-label">↑ South Queue</span>
+                            <span class="queue-value" id="smart-queue-south">0</span>
+                        </div>
+                        <div class="queue-item ew">
+                            <span class="queue-label">→ East Queue</span>
+                            <span class="queue-value" id="smart-queue-east">0</span>
+                        </div>
+                        <div class="queue-item ew">
+                            <span class="queue-label">← West Queue</span>
+                            <span class="queue-value" id="smart-queue-west">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Adaptive Decision Display -->
+                    <div class="adaptive-status">
+                        <div class="adaptive-status-title">🧠 Smart Decisions</div>
+                        <div class="adaptive-decision" id="smart-decision-mode">
+                            <span class="decision-indicator active"></span>
+                            Mode: Analyzing traffic...
+                        </div>
+                        <div class="adaptive-decision" id="smart-decision-action">
+                            <span class="decision-indicator inactive"></span>
+                            Action: Waiting for data...
+                        </div>
+                        <div class="adaptive-decision" id="smart-decision-next">
+                            <span class="decision-indicator inactive"></span>
+                            Next: Calculating...
+                        </div>
                     </div>
 
                     <div class="stats">
@@ -1344,6 +1549,20 @@
                 this.trafficDensity = 'light';
 
                 // ========================================================================
+                // PER-DIRECTION SPAWN RATES (vehicles per minute)
+                // ========================================================================
+                // These control how many vehicles spawn from each direction per minute.
+                // Higher values = more traffic from that direction.
+                // This allows simulating uneven traffic patterns (e.g., rush hour).
+                this.perDirectionRates = {
+                    north: 10,  // Default: 10 vehicles per minute from north
+                    south: 10,  // Default: 10 vehicles per minute from south
+                    east: 10,   // Default: 10 vehicles per minute from east
+                    west: 10    // Default: 10 vehicles per minute from west
+                };
+                this.useCustomRates = false;  // Toggle for custom rates vs preset densities
+
+                // ========================================================================
                 // QUEUE LENGTH TRACKING
                 // ========================================================================
                 // queueSamples: array of queue length samples taken each tick
@@ -1361,6 +1580,47 @@
                 this.completedWaitTimes = [];
                 this.totalCompletedWaitTime = 0; // Sum of all completed wait times (ms)
                 this.waitTimeCount = 0; // Number of vehicles that have completed waiting
+
+                // ========================================================================
+                // INTELLIGENT ADAPTIVE TRAFFIC CONTROL CONFIGURATION
+                // ========================================================================
+                // These parameters control the smart traffic algorithm behavior
+                this.adaptiveConfig = {
+                    // Green light duration bounds (seconds)
+                    minGreen: 8,              // Minimum green time for safety
+                    maxGreen: 45,             // Maximum green time to prevent starvation
+                    baseGreen: 12,            // Starting green time when no data
+
+                    // Dynamic extension parameters
+                    extensionPerVehicle: 2.5, // Extra seconds per waiting vehicle
+                    maxExtensionVehicles: 8,  // Cap on vehicles counted for extension
+
+                    // Early termination parameters
+                    emptyQueueThreshold: 2,   // Seconds with empty queue before early switch
+                    minGreenBeforeSwitch: 5,  // Minimum time before allowing early switch
+
+                    // Starvation prevention
+                    starvationThreshold: 40,  // Force switch after this many seconds waiting
+                    starvationBonus: 15,      // Priority bonus per second of starvation
+
+                    // Priority weights for decision making
+                    queueWeight: 10,          // Priority points per waiting vehicle
+                    urgencyMultiplier: 1.5,   // Multiplier for high-congestion situations
+
+                    // Yellow light duration (fixed for safety)
+                    yellowTime: 3
+                };
+
+                // ========================================================================
+                // ADAPTIVE STATE TRACKING
+                // ========================================================================
+                // Track timing and state for intelligent decisions
+                // Initialize to -1 to indicate "never had green yet"
+                this.lastNSGreenEnd = -1;     // Timestamp when N/S direction last had green
+                this.lastEWGreenEnd = -1;     // Timestamp when E/W direction last had green
+                this.currentPhaseStart = 0;   // When current green phase started
+                this.emptyQueueTicks = 0;     // Consecutive ticks with empty queue on green dir
+                this.phaseExtended = false;   // Whether current phase has been extended
 
                 this.intersection = document.getElementById(`${prefix}-intersection`);
                 this.timer = document.getElementById(`${prefix}-timer`);
@@ -1380,6 +1640,23 @@
             }
 
             getSpawnConfig() {
+                // If using custom per-direction rates, calculate interval from total rate
+                if (this.useCustomRates) {
+                    const totalRate = this.perDirectionRates.north +
+                                      this.perDirectionRates.south +
+                                      this.perDirectionRates.east +
+                                      this.perDirectionRates.west;
+
+                    if (totalRate === 0) {
+                        return { probability: 1, interval: 10000 }; // Very slow if all rates are 0
+                    }
+
+                    // Calculate interval: vehicles per minute -> ms between spawns
+                    // E.g., 40 vehicles/min = 1500ms between spawns
+                    const interval = Math.max(200, Math.min(2000, 60000 / totalRate));
+                    return { probability: 0.0, interval: interval }; // probability 0 means always spawn
+                }
+
                 const configs = {
                     light: { probability: 0.1, interval: 800 },
                     medium: { probability: 0.05, interval: 500 },
@@ -1388,15 +1665,18 @@
                 return configs[this.trafficDensity] || configs.light;
             }
 
+            // ========================================================================
+            // INTELLIGENT TRAFFIC DETECTION
+            // ========================================================================
+            // Enhanced detection that counts ALL waiting vehicles by direction,
+            // not just those in a small zone. This gives accurate queue data.
             detectTraffic() {
-                const stopZoneStart = this.intersection.offsetWidth * 0.15;
-                const stopZoneEnd = this.intersection.offsetWidth * 0.30;
-
                 let nsWaiting = 0;
                 let ewWaiting = 0;
 
+                // Count all vehicles that are queued (waiting AND before stop line)
                 this.vehicles.forEach(vehicle => {
-                    if (vehicle.waiting && vehicle.position >= stopZoneStart && vehicle.position <= stopZoneEnd) {
+                    if (vehicle.waiting && !vehicle.hasPassedIntersection) {
                         if (vehicle.direction === 'north' || vehicle.direction === 'south') {
                             nsWaiting++;
                         } else if (vehicle.direction === 'east' || vehicle.direction === 'west') {
@@ -1408,21 +1688,367 @@
                 return { nsWaiting, ewWaiting };
             }
 
-            adaptTiming() {
+            // ========================================================================
+            // PER-DIRECTION TRAFFIC DETECTION
+            // ========================================================================
+            // Returns the number of waiting vehicles for each individual direction.
+            // Used for the real-time queue display in the smart system.
+            detectTrafficPerDirection() {
+                const queues = { north: 0, south: 0, east: 0, west: 0 };
+
+                this.vehicles.forEach(vehicle => {
+                    if (vehicle.waiting && !vehicle.hasPassedIntersection) {
+                        queues[vehicle.direction]++;
+                    }
+                });
+
+                return queues;
+            }
+
+            // ========================================================================
+            // SET PER-DIRECTION SPAWN RATES
+            // ========================================================================
+            setPerDirectionRates(rates) {
+                this.perDirectionRates = { ...rates };
+                this.useCustomRates = true;
+            }
+
+            // ========================================================================
+            // UPDATE SMART DECISION DISPLAY
+            // ========================================================================
+            // Shows the user what decisions the smart system is making in real-time.
+            updateSmartDecisionDisplay() {
                 if (!this.isAdaptive) return;
 
                 const { nsWaiting, ewWaiting } = this.detectTraffic();
+                const queues = this.detectTrafficPerDirection();
 
+                // Update per-direction queue display
+                const queueNorth = document.getElementById('smart-queue-north');
+                const queueSouth = document.getElementById('smart-queue-south');
+                const queueEast = document.getElementById('smart-queue-east');
+                const queueWest = document.getElementById('smart-queue-west');
+
+                if (queueNorth) queueNorth.textContent = queues.north;
+                if (queueSouth) queueSouth.textContent = queues.south;
+                if (queueEast) queueEast.textContent = queues.east;
+                if (queueWest) queueWest.textContent = queues.west;
+
+                // Update decision display
+                const decisionMode = document.getElementById('smart-decision-mode');
+                const decisionAction = document.getElementById('smart-decision-action');
+                const decisionNext = document.getElementById('smart-decision-next');
+
+                if (!decisionMode || !decisionAction || !decisionNext) return;
+
+                // Determine current mode description
+                let modeText = '';
+                let modeActive = false;
+                if (this.currentState === 'ns-green') {
+                    modeText = `Mode: N/S Green (Queue: ${nsWaiting})`;
+                    modeActive = nsWaiting > 0;
+                } else if (this.currentState === 'ew-green') {
+                    modeText = `Mode: E/W Green (Queue: ${ewWaiting})`;
+                    modeActive = ewWaiting > 0;
+                } else if (this.currentState === 'ns-yellow') {
+                    modeText = `Mode: N/S Yellow - Transitioning`;
+                    modeActive = true;
+                } else {
+                    modeText = `Mode: E/W Yellow - Transitioning`;
+                    modeActive = true;
+                }
+                decisionMode.innerHTML = `<span class="decision-indicator ${modeActive ? 'active' : 'inactive'}"></span>${modeText}`;
+
+                // Determine action description
+                let actionText = '';
+                let actionActive = false;
+                const phaseTime = this.totalTime - this.currentPhaseStart;
+
+                if (this.currentState.includes('green')) {
+                    // Check for early switch condition
+                    const currentQueue = (this.currentState === 'ns-green') ? nsWaiting : ewWaiting;
+                    const otherQueue = (this.currentState === 'ns-green') ? ewWaiting : nsWaiting;
+
+                    if (currentQueue === 0 && otherQueue > 0 && phaseTime >= this.adaptiveConfig.minGreenBeforeSwitch) {
+                        actionText = `Action: Early switch ready (${otherQueue} waiting)`;
+                        actionActive = true;
+                    } else if (currentQueue >= 3 && this.timeRemaining <= 3) {
+                        actionText = `Action: May extend green (+${Math.min(currentQueue * 2, 10)}s)`;
+                        actionActive = true;
+                    } else if (this.phaseExtended) {
+                        actionText = `Action: Green extended`;
+                        actionActive = true;
+                    } else {
+                        actionText = `Action: Normal timing`;
+                        actionActive = false;
+                    }
+                } else {
+                    actionText = `Action: Clearing intersection`;
+                    actionActive = true;
+                }
+                decisionAction.innerHTML = `<span class="decision-indicator ${actionActive ? 'active' : 'inactive'}"></span>${actionText}`;
+
+                // Determine next phase prediction
+                let nextText = '';
+                let nextActive = false;
                 if (this.currentState === 'ns-green' || this.currentState === 'ns-yellow') {
-                    // If no N/S traffic but E/W traffic waiting, cut green time short
-                    if (nsWaiting === 0 && ewWaiting > 0 && this.timeRemaining > 3) {
-                        this.timeRemaining = Math.min(this.timeRemaining, 3);
+                    const nextGreen = this.calculateOptimalGreenTime('ew');
+                    nextText = `Next: E/W Green (~${nextGreen}s for ${ewWaiting} cars)`;
+                    nextActive = ewWaiting > 0;
+                } else {
+                    const nextGreen = this.calculateOptimalGreenTime('ns');
+                    nextText = `Next: N/S Green (~${nextGreen}s for ${nsWaiting} cars)`;
+                    nextActive = nsWaiting > 0;
+                }
+                decisionNext.innerHTML = `<span class="decision-indicator ${nextActive ? 'active' : 'inactive'}"></span>${nextText}`;
+            }
+
+            // ========================================================================
+            // STARVATION TIME CALCULATION
+            // ========================================================================
+            // Calculate how long each direction has been waiting for green light.
+            // Used to prevent any direction from waiting too long.
+            getStarvationTime(direction) {
+                const now = this.totalTime; // Use simulation time in seconds
+
+                if (direction === 'ns') {
+                    // If N/S is currently green, no starvation
+                    if (this.currentState === 'ns-green' || this.currentState === 'ns-yellow') {
+                        return 0;
                     }
-                } else if (this.currentState === 'ew-green' || this.currentState === 'ew-yellow') {
-                    // If no E/W traffic but N/S traffic waiting, cut green time short
-                    if (ewWaiting === 0 && nsWaiting > 0 && this.timeRemaining > 3) {
-                        this.timeRemaining = Math.min(this.timeRemaining, 3);
+                    // If N/S never had green yet (-1), return 0 (no starvation on first cycle)
+                    if (this.lastNSGreenEnd < 0) {
+                        return 0;
                     }
+                    // Time since N/S last had green
+                    return now - this.lastNSGreenEnd;
+                } else {
+                    // If E/W is currently green, no starvation
+                    if (this.currentState === 'ew-green' || this.currentState === 'ew-yellow') {
+                        return 0;
+                    }
+                    // If E/W never had green yet (-1), calculate from simulation start
+                    // This is their "first wait" - count from 0
+                    if (this.lastEWGreenEnd < 0) {
+                        return now;
+                    }
+                    // Time since E/W last had green
+                    return now - this.lastEWGreenEnd;
+                }
+            }
+
+            // ========================================================================
+            // PRIORITY SCORE CALCULATION
+            // ========================================================================
+            // Calculate a priority score for each direction based on:
+            // 1. Number of waiting vehicles (queue pressure)
+            // 2. Time waiting for green (starvation prevention)
+            // 3. Urgency multiplier for heavy congestion
+            calculatePriority(direction) {
+                const config = this.adaptiveConfig;
+                const { nsWaiting, ewWaiting } = this.detectTraffic();
+
+                const queueLength = (direction === 'ns') ? nsWaiting : ewWaiting;
+                const starvationTime = this.getStarvationTime(direction);
+
+                // Base priority from queue length
+                let priority = queueLength * config.queueWeight;
+
+                // Add starvation bonus (increases over time)
+                // This ensures no direction waits forever
+                if (starvationTime > 10) {
+                    priority += (starvationTime - 10) * config.starvationBonus;
+                }
+
+                // Apply urgency multiplier for heavy congestion (5+ vehicles)
+                if (queueLength >= 5) {
+                    priority *= config.urgencyMultiplier;
+                }
+
+                // Force switch if starvation threshold exceeded
+                if (starvationTime >= config.starvationThreshold) {
+                    priority = 99999; // Maximum priority - must switch
+                }
+
+                return priority;
+            }
+
+            // ========================================================================
+            // DYNAMIC GREEN DURATION CALCULATION
+            // ========================================================================
+            // Calculate optimal green light duration based on current queue.
+            // More vehicles = longer green time (up to max).
+            calculateOptimalGreenTime(direction) {
+                const config = this.adaptiveConfig;
+                const { nsWaiting, ewWaiting } = this.detectTraffic();
+
+                const queueLength = (direction === 'ns') ? nsWaiting : ewWaiting;
+
+                // Start with base green time
+                let greenTime = config.baseGreen;
+
+                // Add extension based on queue length (capped)
+                const vehiclesToCount = Math.min(queueLength, config.maxExtensionVehicles);
+                greenTime += vehiclesToCount * config.extensionPerVehicle;
+
+                // Clamp to min/max bounds
+                greenTime = Math.max(config.minGreen, Math.min(config.maxGreen, greenTime));
+
+                return Math.round(greenTime);
+            }
+
+            // ========================================================================
+            // EARLY SWITCH DETECTION
+            // ========================================================================
+            // Determine if we should switch early (before timer expires) because:
+            // 1. Current direction queue is empty
+            // 2. Other direction has waiting traffic
+            // 3. Minimum green time has passed
+            shouldSwitchEarly() {
+                if (!this.isAdaptive) return false;
+
+                const config = this.adaptiveConfig;
+                const { nsWaiting, ewWaiting } = this.detectTraffic();
+
+                // Get current direction's queue and other direction's queue
+                let currentQueue, otherQueue;
+                if (this.currentState === 'ns-green') {
+                    currentQueue = nsWaiting;
+                    otherQueue = ewWaiting;
+                } else if (this.currentState === 'ew-green') {
+                    currentQueue = ewWaiting;
+                    otherQueue = nsWaiting;
+                } else {
+                    return false; // Don't interrupt yellow phases
+                }
+
+                // Calculate time in current phase
+                const phaseTime = this.totalTime - this.currentPhaseStart;
+
+                // Check conditions for early switch:
+                // 1. Minimum green time has passed
+                // 2. Current queue is empty
+                // 3. Other direction has waiting traffic
+                // 4. Empty queue persisted for threshold ticks
+                if (phaseTime >= config.minGreenBeforeSwitch &&
+                    currentQueue === 0 &&
+                    otherQueue > 0 &&
+                    this.emptyQueueTicks >= config.emptyQueueThreshold) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            // ========================================================================
+            // GREEN EXTENSION DETECTION
+            // ========================================================================
+            // Determine if we should extend the current green phase because:
+            // 1. Current direction still has heavy traffic
+            // 2. Max green time not yet reached
+            // 3. Other direction isn't starving
+            shouldExtendGreen() {
+                if (!this.isAdaptive) return false;
+
+                const config = this.adaptiveConfig;
+                const { nsWaiting, ewWaiting } = this.detectTraffic();
+
+                // Get current and other direction info
+                let currentQueue, otherDirection;
+                if (this.currentState === 'ns-green') {
+                    currentQueue = nsWaiting;
+                    otherDirection = 'ew';
+                } else if (this.currentState === 'ew-green') {
+                    currentQueue = ewWaiting;
+                    otherDirection = 'ns';
+                } else {
+                    return false;
+                }
+
+                // Calculate time in current phase
+                const phaseTime = this.totalTime - this.currentPhaseStart;
+
+                // Don't extend if already at max
+                if (phaseTime >= config.maxGreen) {
+                    return false;
+                }
+
+                // Don't extend if other direction is starving
+                const otherStarvation = this.getStarvationTime(otherDirection);
+                if (otherStarvation >= config.starvationThreshold * 0.7) {
+                    return false;
+                }
+
+                // Extend if current direction still has significant queue (3+ vehicles)
+                if (currentQueue >= 3 && !this.phaseExtended) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            // ========================================================================
+            // INTELLIGENT ADAPTIVE TIMING - MAIN ALGORITHM
+            // ========================================================================
+            // This is the core adaptive algorithm that runs every tick.
+            // It makes intelligent decisions about phase timing and switching.
+            adaptTiming() {
+                if (!this.isAdaptive) return;
+
+                const config = this.adaptiveConfig;
+                const { nsWaiting, ewWaiting } = this.detectTraffic();
+
+                // Track empty queue ticks for early switching
+                let currentQueue;
+                if (this.currentState === 'ns-green') {
+                    currentQueue = nsWaiting;
+                } else if (this.currentState === 'ew-green') {
+                    currentQueue = ewWaiting;
+                } else {
+                    currentQueue = -1; // Yellow phase
+                }
+
+                if (currentQueue === 0) {
+                    this.emptyQueueTicks++;
+                } else {
+                    this.emptyQueueTicks = 0;
+                }
+
+                // ================================================================
+                // DECISION 1: Check for early switch (empty queue optimization)
+                // ================================================================
+                if (this.shouldSwitchEarly()) {
+                    // Set to 1 so after decrement it becomes 0 and triggers transition
+                    this.timeRemaining = 1;
+                    return;
+                }
+
+                // ================================================================
+                // DECISION 2: Check for green extension (heavy traffic)
+                // ================================================================
+                // Only extend during green phases (currentQueue >= 0)
+                if (currentQueue >= 0 && this.timeRemaining <= 2 && this.shouldExtendGreen()) {
+                    // Calculate extension based on remaining queue
+                    const extension = Math.min(
+                        currentQueue * 2,  // 2 seconds per waiting vehicle
+                        10                  // Max 10 second extension
+                    );
+                    if (extension > 0) {
+                        this.timeRemaining += extension;
+                        this.phaseExtended = true;
+                        return;
+                    }
+                }
+
+                // ================================================================
+                // DECISION 3: Dynamic timer adjustment based on conditions
+                // ================================================================
+                // If time is running low but queue is still significant,
+                // and we haven't extended yet, consider a small bump
+                // Only applies during green phases
+                if (currentQueue >= 4 && this.timeRemaining === 3 && !this.phaseExtended) {
+                    this.timeRemaining += 3; // Small extension
+                    this.phaseExtended = true;
                 }
             }
 
@@ -1568,31 +2194,82 @@
             }
 
             nextState() {
+                // ================================================================
+                // INTELLIGENT STATE TRANSITION
+                // ================================================================
+                // For adaptive mode, we dynamically calculate green times based on
+                // current traffic conditions and use priority scoring to decide
+                // which direction should go next.
+
                 if (this.currentState === 'ns-green') {
+                    // N/S green ending -> transition to N/S yellow
                     this.currentState = 'ns-yellow';
-                    this.timeRemaining = this.timings.yellow;
+                    this.timeRemaining = this.isAdaptive
+                        ? this.adaptiveConfig.yellowTime
+                        : this.timings.yellow;
+
+                    // Record when N/S green phase ended (for starvation tracking)
+                    if (this.isAdaptive) {
+                        this.lastNSGreenEnd = this.totalTime;
+                    }
+
                 } else if (this.currentState === 'ns-yellow') {
+                    // N/S yellow ending -> transition to E/W green
                     this.currentState = 'ew-green';
-                    this.timeRemaining = this.timings.green;
+
+                    // ADAPTIVE: Calculate optimal green time based on E/W queue
+                    if (this.isAdaptive) {
+                        this.timeRemaining = this.calculateOptimalGreenTime('ew');
+                        this.currentPhaseStart = this.totalTime;
+                        this.emptyQueueTicks = 0;
+                        this.phaseExtended = false;
+                    } else {
+                        this.timeRemaining = this.timings.green;
+                    }
+
                 } else if (this.currentState === 'ew-green') {
+                    // E/W green ending -> transition to E/W yellow
                     this.currentState = 'ew-yellow';
-                    this.timeRemaining = this.timings.yellow;
+                    this.timeRemaining = this.isAdaptive
+                        ? this.adaptiveConfig.yellowTime
+                        : this.timings.yellow;
+
+                    // Record when E/W green phase ended (for starvation tracking)
+                    if (this.isAdaptive) {
+                        this.lastEWGreenEnd = this.totalTime;
+                    }
+
                 } else {
+                    // E/W yellow ending -> transition to N/S green
                     this.currentState = 'ns-green';
-                    this.timeRemaining = this.timings.green;
+
+                    // ADAPTIVE: Calculate optimal green time based on N/S queue
+                    if (this.isAdaptive) {
+                        this.timeRemaining = this.calculateOptimalGreenTime('ns');
+                        this.currentPhaseStart = this.totalTime;
+                        this.emptyQueueTicks = 0;
+                        this.phaseExtended = false;
+                    } else {
+                        this.timeRemaining = this.timings.green;
+                    }
+
+                    // Increment cycle count
                     this.cycleCount++;
                     document.getElementById(`${this.prefix}-cycle`).textContent = this.cycleCount;
                 }
             }
 
             tick() {
-                this.timeRemaining--;
                 this.totalTime++;
 
-                // Apply adaptive timing if enabled
+                // Apply adaptive timing BEFORE decrementing timer
+                // This allows early switch decisions to take effect immediately
                 this.adaptTiming();
 
-                if (this.timeRemaining < 0) {
+                this.timeRemaining--;
+
+                // Check for state transition when timer expires (reaches 0 or below)
+                if (this.timeRemaining <= 0) {
                     this.nextState();
                 }
 
@@ -1605,33 +2282,99 @@
                 // Every tick (1 second), sample the current queue length and update display
                 this.sampleQueueLength();
                 this.updateStatisticsDisplay();
+
+                // ========================================================================
+                // UPDATE SMART DECISION DISPLAY
+                // ========================================================================
+                // For adaptive mode, show real-time decision information
+                this.updateSmartDecisionDisplay();
             }
 
             spawnVehicle() {
                 const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
                 const emojis = ['🚗', '🚙', '🚕', '🚐', '🚗'];
 
-                // Shuffle directions array for truly random selection with equal distribution
-                const directions = ['north', 'south', 'east', 'west'];
+                // ========================================================================
+                // DIRECTION SELECTION BASED ON SPAWN RATES
+                // ========================================================================
+                // When using custom rates, we use weighted random selection.
+                // Each direction's weight is based on its spawn rate.
+                // This creates realistic uneven traffic patterns.
 
-                // Fisher-Yates shuffle for more randomness
-                for (let i = directions.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [directions[i], directions[j]] = [directions[j], directions[i]];
-                }
-
-                // Try each direction until we find one that's not blocked
                 let direction = null;
                 const spawnBlockDistance = 80;
 
-                for (let dir of directions) {
-                    const hasBlockingVehicle = this.vehicles.some(v =>
-                        v.direction === dir && v.position < spawnBlockDistance
-                    );
+                if (this.useCustomRates) {
+                    // Weighted random selection based on per-direction rates
+                    const rates = this.perDirectionRates;
+                    const totalRate = rates.north + rates.south + rates.east + rates.west;
 
-                    if (!hasBlockingVehicle) {
-                        direction = dir;
-                        break;
+                    if (totalRate === 0) return; // No spawning if all rates are 0
+
+                    // Build weighted direction list
+                    const weightedDirections = [];
+                    if (rates.north > 0) weightedDirections.push({ dir: 'north', weight: rates.north });
+                    if (rates.south > 0) weightedDirections.push({ dir: 'south', weight: rates.south });
+                    if (rates.east > 0) weightedDirections.push({ dir: 'east', weight: rates.east });
+                    if (rates.west > 0) weightedDirections.push({ dir: 'west', weight: rates.west });
+
+                    // Shuffle weighted directions for fairness when weights are equal
+                    for (let i = weightedDirections.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [weightedDirections[i], weightedDirections[j]] = [weightedDirections[j], weightedDirections[i]];
+                    }
+
+                    // Pick direction using weighted random
+                    const rand = Math.random() * totalRate;
+                    let cumulative = 0;
+                    for (const item of weightedDirections) {
+                        cumulative += item.weight;
+                        if (rand < cumulative) {
+                            // Check if this direction is blocked
+                            const hasBlockingVehicle = this.vehicles.some(v =>
+                                v.direction === item.dir && v.position < spawnBlockDistance
+                            );
+                            if (!hasBlockingVehicle) {
+                                direction = item.dir;
+                            }
+                            break;
+                        }
+                    }
+
+                    // If chosen direction is blocked, try others in order of weight
+                    if (!direction) {
+                        // Sort by weight descending for priority
+                        weightedDirections.sort((a, b) => b.weight - a.weight);
+                        for (const item of weightedDirections) {
+                            const hasBlockingVehicle = this.vehicles.some(v =>
+                                v.direction === item.dir && v.position < spawnBlockDistance
+                            );
+                            if (!hasBlockingVehicle) {
+                                direction = item.dir;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    // Original behavior: equal distribution with shuffle
+                    const directions = ['north', 'south', 'east', 'west'];
+
+                    // Fisher-Yates shuffle for more randomness
+                    for (let i = directions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [directions[i], directions[j]] = [directions[j], directions[i]];
+                    }
+
+                    // Try each direction until we find one that's not blocked
+                    for (let dir of directions) {
+                        const hasBlockingVehicle = this.vehicles.some(v =>
+                            v.direction === dir && v.position < spawnBlockDistance
+                        );
+
+                        if (!hasBlockingVehicle) {
+                            direction = dir;
+                            break;
+                        }
                     }
                 }
 
@@ -1656,6 +2399,11 @@
 
                 // Sort vehicles by position so we process them in order
                 this.vehicles.sort((a, b) => a.position - b.position);
+
+                // Update smart decision display more frequently for smoother queue counts
+                if (this.isAdaptive) {
+                    this.updateSmartDecisionDisplay();
+                }
 
                 this.vehicles = this.vehicles.filter(vehicle => {
                     // Determine if vehicle can pass based on direction
@@ -1699,7 +2447,18 @@
                     return;
                 }
 
+                // CRITICAL: Prevent duplicate intervals by checking if already running
+                if (this.interval !== null) {
+                    return;  // Already running, don't create duplicate intervals
+                }
+
                 this.isPaused = false;
+
+                // Initialize adaptive state tracking on first start
+                if (this.isAdaptive && this.currentPhaseStart === 0) {
+                    this.currentPhaseStart = this.totalTime;
+                }
+
                 this.updateLights();
 
                 const config = this.getSpawnConfig();
@@ -1711,8 +2470,12 @@
                 }, 1000);
 
                 this.vehicleInterval = setInterval(() => {
-                    if (!this.isPaused && Math.random() > config.probability) {
-                        this.spawnVehicle();
+                    // For custom rates, probability is 0 (always spawn)
+                    // For preset densities, use probability check
+                    if (!this.isPaused) {
+                        if (this.useCustomRates || Math.random() > config.probability) {
+                            this.spawnVehicle();
+                        }
                     }
                 }, config.interval);
 
@@ -1748,9 +2511,10 @@
 
             restartWithDensity() {
                 this.stop();
+                this.isPaused = false;  // Ensure simulation is not paused
+
                 const config = this.getSpawnConfig();
 
-                this.isPaused = false;
                 this.interval = setInterval(() => {
                     if (!this.isPaused) {
                         this.tick();
@@ -1758,8 +2522,12 @@
                 }, 1000);
 
                 this.vehicleInterval = setInterval(() => {
-                    if (!this.isPaused && Math.random() > config.probability) {
-                        this.spawnVehicle();
+                    // For custom rates, always attempt to spawn
+                    // For preset densities, use probability check
+                    if (!this.isPaused) {
+                        if (this.useCustomRates || Math.random() > config.probability) {
+                            this.spawnVehicle();
+                        }
                     }
                 }, config.interval);
 
@@ -1772,13 +2540,28 @@
 
             reset() {
                 this.stop();
+                this.isPaused = false;  // CRITICAL: Reset paused state before calling start()
                 this.vehicles.forEach(v => v.element && v.element.remove());
                 this.vehicles = [];
                 this.currentState = 'ns-green';
-                this.timeRemaining = this.timings.green;
                 this.vehiclesPassed = 0;
                 this.cycleCount = 1;
                 this.totalTime = 0;
+
+                // ========================================================================
+                // RESET ADAPTIVE TIMING STATE
+                // ========================================================================
+                // For adaptive mode, calculate initial green time; otherwise use fixed timing
+                if (this.isAdaptive) {
+                    this.timeRemaining = this.adaptiveConfig.baseGreen;
+                    this.currentPhaseStart = 0;
+                    this.lastNSGreenEnd = -1;   // -1 indicates "never had green yet"
+                    this.lastEWGreenEnd = -1;   // -1 indicates "never had green yet"
+                    this.emptyQueueTicks = 0;
+                    this.phaseExtended = false;
+                } else {
+                    this.timeRemaining = this.timings.green;
+                }
 
                 // ========================================================================
                 // RESET QUEUE AND WAIT TIME TRACKING
@@ -1795,6 +2578,15 @@
                 document.getElementById(`${this.prefix}-total-time`).textContent = '0s';
                 document.getElementById(`${this.prefix}-avg-queue`).textContent = '0.0';
                 document.getElementById(`${this.prefix}-avg-wait`).textContent = '0.0s';
+
+                // Reset smart queue display if this is the adaptive intersection
+                if (this.isAdaptive) {
+                    const queueElements = ['north', 'south', 'east', 'west'];
+                    queueElements.forEach(dir => {
+                        const el = document.getElementById(`smart-queue-${dir}`);
+                        if (el) el.textContent = '0';
+                    });
+                }
 
                 this.updateLights();
                 this.start();
@@ -1844,11 +2636,64 @@
         // Traffic density change handler
         document.getElementById('traffic-density').addEventListener('change', (e) => {
             const density = e.target.value;
-            fixedIntersection.setTrafficDensity(density);
-            smartIntersection.setTrafficDensity(density);
-            fixedIntersection.restartWithDensity();
-            smartIntersection.restartWithDensity();
+            const directionControls = document.getElementById('direction-controls');
+
+            if (density === 'custom') {
+                // Show per-direction controls
+                directionControls.style.display = 'block';
+                // Enable custom rates mode
+                fixedIntersection.useCustomRates = true;
+                smartIntersection.useCustomRates = true;
+            } else {
+                // Hide per-direction controls
+                directionControls.style.display = 'none';
+                // Disable custom rates mode
+                fixedIntersection.useCustomRates = false;
+                smartIntersection.useCustomRates = false;
+                // Set preset density
+                fixedIntersection.setTrafficDensity(density);
+                smartIntersection.setTrafficDensity(density);
+                fixedIntersection.restartWithDensity();
+                smartIntersection.restartWithDensity();
+            }
         });
+
+        // Per-direction spawn rate update function
+        function updateSpawnRates() {
+            const rates = {
+                north: parseInt(document.getElementById('spawn-north').value) || 0,
+                south: parseInt(document.getElementById('spawn-south').value) || 0,
+                east: parseInt(document.getElementById('spawn-east').value) || 0,
+                west: parseInt(document.getElementById('spawn-west').value) || 0
+            };
+
+            // Validate rates
+            for (const dir in rates) {
+                if (rates[dir] < 0) rates[dir] = 0;
+                if (rates[dir] > 60) rates[dir] = 60;
+            }
+
+            // Apply to both intersections
+            fixedIntersection.setPerDirectionRates(rates);
+            smartIntersection.setPerDirectionRates(rates);
+
+            // Calculate spawn interval based on total rate
+            // Higher total rate = faster spawning
+            const totalRate = rates.north + rates.south + rates.east + rates.west;
+            if (totalRate > 0) {
+                // Convert vehicles per minute to milliseconds per spawn attempt
+                // With 60 vehicles per minute total, spawn every 1000ms
+                const baseInterval = 60000 / totalRate;
+                const interval = Math.max(200, Math.min(2000, baseInterval));
+
+                // Restart with new custom settings
+                fixedIntersection.restartWithDensity();
+                smartIntersection.restartWithDensity();
+            }
+
+            // Show confirmation
+            console.log(`Spawn rates updated: N=${rates.north}, S=${rates.south}, E=${rates.east}, W=${rates.west}`);
+        }
 
         // Theme toggle function
         function toggleTheme() {
