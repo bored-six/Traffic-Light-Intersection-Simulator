@@ -880,6 +880,14 @@
                             <span class="stat-label">Total Time:</span>
                             <span class="stat-value" id="fixed-total-time">0s</span>
                         </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg Queue Length:</span>
+                            <span class="stat-value" id="fixed-avg-queue">0.0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg Wait Time:</span>
+                            <span class="stat-value" id="fixed-avg-wait">0.0s</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -938,7 +946,7 @@
                 <div class="info-panel">
                     <div class="traffic-light-display">
                         <div class="light-large red" id="smart-red-large"></div>
-             ß           <div class="light-large yellow" id="smart-yellow-large"></div>
+                        <div class="light-large yellow" id="smart-yellow-large"></div>
                         <div class="light-large green" id="smart-green-large"></div>
                         <div class="timer-display" id="smart-timer">20</div>
                         <div class="status-display" id="smart-status">GO</div>
@@ -956,6 +964,14 @@
                         <div class="stat-item">
                             <span class="stat-label">Total Time:</span>
                             <span class="stat-value" id="smart-total-time">0s</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg Queue Length:</span>
+                            <span class="stat-value" id="smart-avg-queue">0.0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg Wait Time:</span>
+                            <span class="stat-value" id="smart-avg-wait">0.0s</span>
                         </div>
                     </div>
                 </div>
@@ -978,6 +994,16 @@
                 this.waiting = false;
                 this.hasPassedIntersection = false;
                 this.isCrossingIntersection = false;
+
+                // ========================================================================
+                // WAITING TIME TRACKING
+                // ========================================================================
+                // waitStartTime: timestamp (ms) when this vehicle started waiting
+                // totalWaitTime: accumulated wait time in milliseconds
+                // wasWaiting: previous frame's waiting state (to detect state changes)
+                this.waitStartTime = null;
+                this.totalWaitTime = 0;
+                this.wasWaiting = false;
             }
 
             create(intersection) {
@@ -1226,6 +1252,31 @@
                 }
 
                 // ========================================================================
+                // STEP 5.5: UPDATE WAITING TIME TRACKING
+                // ========================================================================
+                // Track how long this vehicle spends waiting at the stop line.
+                // A vehicle is considered "queued" if it is waiting AND before the stop line.
+                const now = Date.now();
+
+                if (this.waiting && !this.hasPassedIntersection) {
+                    // Vehicle is queued (waiting before stop line)
+                    if (!this.wasWaiting) {
+                        // Just started waiting - record the start time
+                        this.waitStartTime = now;
+                    }
+                } else {
+                    // Vehicle is moving or has passed the intersection
+                    if (this.wasWaiting && this.waitStartTime !== null) {
+                        // Just stopped waiting - accumulate the wait time
+                        this.totalWaitTime += now - this.waitStartTime;
+                        this.waitStartTime = null;
+                    }
+                }
+
+                // Update previous waiting state for next frame
+                this.wasWaiting = this.waiting && !this.hasPassedIntersection;
+
+                // ========================================================================
                 // STEP 6: UPDATE VISUAL POSITION
                 // ========================================================================
                 // All cars spawn at 50px off-screen. Position=0 corresponds to spawn point.
@@ -1292,6 +1343,25 @@
                 this.isPaused = false;
                 this.trafficDensity = 'light';
 
+                // ========================================================================
+                // QUEUE LENGTH TRACKING
+                // ========================================================================
+                // queueSamples: array of queue length samples taken each tick
+                // Each sample is the total number of vehicles queued across all roads
+                // Used to compute a running average queue length per minute
+                this.queueSamples = [];
+                this.lastMinuteStart = 0; // Track when the current minute started
+
+                // ========================================================================
+                // WAITING TIME TRACKING
+                // ========================================================================
+                // completedWaitTimes: array of wait durations (ms) from vehicles that
+                // have finished waiting and moved through the intersection
+                // Used to compute the average wait time across all vehicles
+                this.completedWaitTimes = [];
+                this.totalCompletedWaitTime = 0; // Sum of all completed wait times (ms)
+                this.waitTimeCount = 0; // Number of vehicles that have completed waiting
+
                 this.intersection = document.getElementById(`${prefix}-intersection`);
                 this.timer = document.getElementById(`${prefix}-timer`);
                 this.status = document.getElementById(`${prefix}-status`);
@@ -1353,6 +1423,85 @@
                     if (ewWaiting === 0 && nsWaiting > 0 && this.timeRemaining > 3) {
                         this.timeRemaining = Math.min(this.timeRemaining, 3);
                     }
+                }
+            }
+
+            // ========================================================================
+            // QUEUE LENGTH CALCULATION
+            // ========================================================================
+            // Counts vehicles that are queued (waiting AND before stop line)
+            // A vehicle is "queued" if: waiting === true AND hasPassedIntersection === false
+            countQueuedVehicles() {
+                let count = 0;
+                for (const vehicle of this.vehicles) {
+                    if (vehicle.waiting && !vehicle.hasPassedIntersection) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+
+            // Sample the current queue length and add to running samples
+            // Called every tick (1 second) to build an accurate average
+            sampleQueueLength() {
+                const currentQueue = this.countQueuedVehicles();
+                this.queueSamples.push(currentQueue);
+
+                // Keep samples from the last minute (60 samples at 1 per second)
+                // This gives us a rolling 1-minute average
+                const SAMPLES_PER_MINUTE = 60;
+                if (this.queueSamples.length > SAMPLES_PER_MINUTE) {
+                    this.queueSamples.shift();
+                }
+            }
+
+            // Calculate the average queue length from recent samples
+            // Returns the average number of vehicles queued per sampling period
+            calculateAverageQueueLength() {
+                if (this.queueSamples.length === 0) return 0;
+
+                const sum = this.queueSamples.reduce((acc, val) => acc + val, 0);
+                return sum / this.queueSamples.length;
+            }
+
+            // ========================================================================
+            // WAITING TIME CALCULATION
+            // ========================================================================
+            // Record a completed wait time when a vehicle finishes waiting
+            // Called when a vehicle exits the simulation after having waited
+            recordCompletedWaitTime(waitTimeMs) {
+                if (waitTimeMs > 0) {
+                    this.completedWaitTimes.push(waitTimeMs);
+                    this.totalCompletedWaitTime += waitTimeMs;
+                    this.waitTimeCount++;
+                }
+            }
+
+            // Calculate the average waiting time in seconds
+            // Returns the mean wait time across all vehicles that have waited
+            calculateAverageWaitTime() {
+                if (this.waitTimeCount === 0) return 0;
+
+                // Convert from milliseconds to seconds
+                return (this.totalCompletedWaitTime / this.waitTimeCount) / 1000;
+            }
+
+            // ========================================================================
+            // UPDATE STATISTICS DISPLAY
+            // ========================================================================
+            // Updates the UI with current average queue length and wait time
+            updateStatisticsDisplay() {
+                const avgQueue = this.calculateAverageQueueLength();
+                const avgWait = this.calculateAverageWaitTime();
+
+                const avgQueueElement = document.getElementById(`${this.prefix}-avg-queue`);
+                const avgWaitElement = document.getElementById(`${this.prefix}-avg-wait`);
+
+                if (avgQueueElement) {
+                    avgQueueElement.textContent = avgQueue.toFixed(1);
+                }
+                if (avgWaitElement) {
+                    avgWaitElement.textContent = `${avgWait.toFixed(1)}s`;
                 }
             }
 
@@ -1449,6 +1598,13 @@
 
                 this.updateLights();
                 document.getElementById(`${this.prefix}-total-time`).textContent = `${this.totalTime}s`;
+
+                // ========================================================================
+                // SAMPLE QUEUE LENGTH AND UPDATE STATISTICS
+                // ========================================================================
+                // Every tick (1 second), sample the current queue length and update display
+                this.sampleQueueLength();
+                this.updateStatisticsDisplay();
             }
 
             spawnVehicle() {
@@ -1515,6 +1671,22 @@
                     if (!stillActive && vehicle.hasPassedIntersection) {
                         this.vehiclesPassed++;
                         document.getElementById(`${this.prefix}-vehicles-passed`).textContent = this.vehiclesPassed;
+
+                        // ========================================================================
+                        // RECORD COMPLETED WAIT TIME
+                        // ========================================================================
+                        // When a vehicle exits the simulation, finalize its wait time.
+                        // If the vehicle was still waiting when it exited (edge case), calculate
+                        // the remaining wait time. Then record the total wait time for statistics.
+                        let finalWaitTime = vehicle.totalWaitTime;
+
+                        // If vehicle is currently waiting (shouldn't happen at exit, but just in case)
+                        if (vehicle.waitStartTime !== null) {
+                            finalWaitTime += Date.now() - vehicle.waitStartTime;
+                        }
+
+                        // Record the completed wait time for average calculation
+                        this.recordCompletedWaitTime(finalWaitTime);
                     }
 
                     return stillActive;
@@ -1607,9 +1779,23 @@
                 this.vehiclesPassed = 0;
                 this.cycleCount = 1;
                 this.totalTime = 0;
+
+                // ========================================================================
+                // RESET QUEUE AND WAIT TIME TRACKING
+                // ========================================================================
+                this.queueSamples = [];
+                this.lastMinuteStart = 0;
+                this.completedWaitTimes = [];
+                this.totalCompletedWaitTime = 0;
+                this.waitTimeCount = 0;
+
+                // Update UI elements
                 document.getElementById(`${this.prefix}-vehicles-passed`).textContent = '0';
                 document.getElementById(`${this.prefix}-cycle`).textContent = '1';
                 document.getElementById(`${this.prefix}-total-time`).textContent = '0s';
+                document.getElementById(`${this.prefix}-avg-queue`).textContent = '0.0';
+                document.getElementById(`${this.prefix}-avg-wait`).textContent = '0.0s';
+
                 this.updateLights();
                 this.start();
             }
